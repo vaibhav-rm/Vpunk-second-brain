@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second Brain — Documentation & Hardware Spec</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            darkbg: '#030303',
+            obsidian: '#09090b',
+            cardbg: '#121214',
+            cybercyan: '#22d3ee',
+            cyberpurple: '#a855f7',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      background-color: #030303;
+      color: #f4f4f5;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030303;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+    
+    /* Code block styling */
+    pre {
+      background-color: #09090b !important;
+      border: 1px solid #1f1f23;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased text-zinc-300 min-h-screen flex flex-col">
+
+  <!-- Header Banner -->
+  <header class="w-full border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white">SECOND BRAIN</h1>
+        <span class="text-[9px] text-zinc-500 font-mono tracking-widest uppercase block">Developer Documentation Suite</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-[10px] font-mono bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">v0.1.0</span>
+      <a href="/" class="text-xs text-zinc-400 hover:text-white transition-colors flex items-center gap-1">
+        Back to Landing Page
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container Layout -->
+  <div class="flex-grow max-w-7xl mx-auto w-full flex flex-col md:flex-row relative">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 flex-shrink-0 p-6 border-b md:border-b-0 md:border-r border-zinc-900 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] overflow-y-auto">
+      <!-- Search Input Filter -->
+      <div class="mb-6 relative">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-3.5 h-3.5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </span>
+        <input 
+          id="search-input"
+          type="text" 
+          placeholder="Filter topics..." 
+          class="w-full pl-9 pr-3 py-1.5 bg-zinc-950 border border-zinc-850 rounded-lg text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 font-medium"
+        />
+      </div>
+
+      <nav class="space-y-6 text-xs" id="sidebar-menu">
+        <div>
+          <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Second Brain Core</h2>
+          <ul class="space-y-2 font-medium">
+            <li><a href="#intro" class="menu-link block text-zinc-400 hover:text-white py-1">1. Introduction</a></li>
+            <li><a href="#schematic" class="menu-link block text-zinc-400 hover:text-white py-1">2. Hardware Schematic</a></li>
+            <li><a href="#flashing" class="menu-link block text-zinc-400 hover:text-white py-1">3. Firmware Installation</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Server Integration</h2>
+          <ul class="space-y-2 font-medium">
+            <li><a href="#api" class="menu-link block text-zinc-400 hover:text-white py-1">4. API Endpoint Reference</a></li>
+            <li><a href="#dashboard" class="menu-link block text-zinc-400 hover:text-white py-1">5. Web Dashboard Guide</a></li>
+            <li><a href="#troubleshooting" class="menu-link block text-zinc-400 hover:text-white py-1">6. Troubleshooting</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-grow p-6 md:p-10 max-w-4xl overflow-y-auto space-y-16">
+      
+      <!-- Introduction Section -->
+      <section id="intro" class="doc-section scroll-mt-24 space-y-4">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">1.</span>
+          <span>Introduction</span>
+        </h2>
+        <p class="text-xs sm:text-sm leading-relaxed text-zinc-400">
+          The <strong>Second Brain Wearable Companion</strong> is an open-source hardware pendant and cognitive logging system. Built around the <strong>ESP32-C6 RISC-V SoC</strong>, the device records high-fidelity voice dictations, classifies your neural intent, and pushes structured tasks, reminders, and voice memories into a Next.js database dashboard.
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="bg-cardbg border border-zinc-900 p-4 rounded-xl space-y-2">
+            <h3 class="text-xs font-semibold text-white flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cybercyan"></span>
+              Ultra-low Latency Streams
+            </h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">
+              Dictate notes directly from your chest. The system formats I2S microphone inputs into signed 16-bit PCM WAV headers and streams them to the server over WiFi in less than 3 seconds.
+            </p>
+          </div>
+          <div class="bg-cardbg border border-zinc-900 p-4 rounded-xl space-y-2">
+            <h3 class="text-xs font-semibold text-white flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyberpurple"></span>
+              NVS Cache Configuration
+            </h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">
+              SSID, agent hosts, display brightness, and LED modes are cached locally on the ESP32 Non-Volatile Storage (NVS) flash partition. Configuration updates dynamically sync during heartbeat checks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hardware Schematic Section -->
+      <section id="schematic" class="doc-section scroll-mt-24 space-y-6">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">2.</span>
+          <span>Hardware Schematic</span>
+        </h2>
+        <p class="text-xs sm:text-sm leading-relaxed text-zinc-400">
+          The Second Brain system is composed of an ESP32-C6 controller connected to an I2S digital microphone, an I2C OLED screen, and tactical status components. Use the pin configuration below to wire your board.
+        </p>
+
+        <!-- GPIO table -->
+        <div class="border border-zinc-900 rounded-xl overflow-hidden bg-cardbg/30">
+          <table class="w-full text-left font-mono text-[11px] border-collapse">
+            <thead>
+              <tr class="bg-zinc-950/80 border-b border-zinc-900 text-zinc-500 font-bold">
+                <th class="py-3 px-4">Peripheral</th>
+                <th class="py-3 px-4">ESP32-C6 Pin</th>
+                <th class="py-3 px-4">Signal</th>
+                <th class="py-3 px-4">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-900 text-zinc-300">
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">INMP441 Microphone</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 4</td>
+                <td class="py-2.5 px-4">SCK (Serial Clock)</td>
+                <td class="py-2.5 px-4 text-zinc-500">I2S clock line</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">INMP441 Microphone</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 5</td>
+                <td class="py-2.5 px-4">WS (Word Select)</td>
+                <td class="py-2.5 px-4 text-zinc-500">L/R channel frame clock</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">INMP441 Microphone</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 20</td>
+                <td class="py-2.5 px-4">SD (Serial Data)</td>
+                <td class="py-2.5 px-4 text-zinc-500">Audio data output pin</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">INMP441 Microphone</td>
+                <td class="py-2.5 px-4 text-zinc-500">GND / VCC</td>
+                <td class="py-2.5 px-4">GND / 3.3V</td>
+                <td class="py-2.5 px-4 text-zinc-500">Power pins. L/R select tied to GND.</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">SSD1306 OLED (I2C)</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 6</td>
+                <td class="py-2.5 px-4">SDA (I2C Data)</td>
+                <td class="py-2.5 px-4 text-zinc-500">OLED display serial data</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">SSD1306 OLED (I2C)</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 7</td>
+                <td class="py-2.5 px-4">SCL (I2C Clock)</td>
+                <td class="py-2.5 px-4 text-zinc-500">OLED display serial clock</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">WS2812B NeoPixel</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 8</td>
+                <td class="py-2.5 px-4">DI (Data Input)</td>
+                <td class="py-2.5 px-4 text-zinc-500">Addressable RGB status pixel</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-4 font-semibold text-white">Action Button</td>
+                <td class="py-2.5 px-4 text-cybercyan font-bold">GPIO 1</td>
+                <td class="py-2.5 px-4">TACTILE (PULLUP)</td>
+                <td class="py-2.5 px-4 text-zinc-500">Trigger record when pulled to Ground</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Firmware Installation Section -->
+      <section id="flashing" class="doc-section scroll-mt-24 space-y-6">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">3.</span>
+          <span>Firmware Installation</span>
+        </h2>
+        <p class="text-xs sm:text-sm leading-relaxed text-zinc-400">
+          The device firmware is located in the <code class="bg-zinc-900 text-zinc-300 px-1 py-0.5 rounded text-[11px]">firmware/</code> directory. Follow the compilation steps below using the Arduino IDE or the command-line upload script.
+        </p>
+
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Library Dependencies</h3>
+          <p class="text-xs text-zinc-500 leading-normal">
+            Ensure you have installed the following libraries inside the Arduino Library Manager:
+          </p>
+          <ul class="list-disc pl-5 text-xs text-zinc-400 space-y-1">
+            <li><strong>ArduinoJson</strong> (v6.x or v7.x) for heartbeat JSON schema operations</li>
+            <li><strong>Adafruit SSD1306</strong> and <strong>Adafruit GFX</strong> for OLED rendering</li>
+            <li><strong>Adafruit NeoPixel</strong> for controlling the onboard WS2812B LED status behaviors</li>
+          </ul>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Step-by-Step Compilation</h3>
+          
+          <div class="relative group">
+            <button class="copy-btn absolute top-3 right-3 bg-zinc-900 border border-zinc-800 text-[10px] font-semibold text-zinc-400 hover:text-white px-2 py-1 rounded transition-all">Copy</button>
+            <pre class="p-4 rounded-xl font-mono text-[11px] text-zinc-300 overflow-x-auto">
+<span class="text-zinc-600">// 1. Open firmware/config.h and set your WiFi and Next.js host credentials:</span>
+#define DEFAULT_WIFI_SSID "Simba"
+#define DEFAULT_WIFI_PASS "Simba.5g"
+
+// Point this to your server machine's local IP address
+#define DEFAULT_AGENT_HOST "192.168.29.8" 
+#define DEFAULT_AGENT_PORT 3000</pre>
+          </div>
+
+          <div class="relative group">
+            <button class="copy-btn absolute top-3 right-3 bg-zinc-900 border border-zinc-800 text-[10px] font-semibold text-zinc-400 hover:text-white px-2 py-1 rounded transition-all">Copy</button>
+            <pre class="p-4 rounded-xl font-mono text-[11px] text-zinc-300 overflow-x-auto">
+<span class="text-zinc-600">// 2. Connect the ESP32-C6 to your computer and execute upload.sh:</span>
+$ cd firmware
+$ chmod +x upload.sh
+$ ./upload.sh</pre>
+          </div>
+          
+          <p class="text-xs text-zinc-500 leading-relaxed">
+            The shell script will automatically search for the correct ESP32 serial port (ttyUSBx / ttyACMx) and build and flash the firmware using the <code class="bg-zinc-900 text-zinc-300 px-1 py-0.5 rounded text-[11px]">arduino-cli</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- API Reference Section -->
+      <section id="api" class="doc-section scroll-mt-24 space-y-6">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">4.</span>
+          <span>API Endpoint Reference</span>
+        </h2>
+        <p class="text-xs sm:text-sm leading-relaxed text-zinc-400">
+          The wearable coordinates with the Next.js server using a series of JSON HTTP endpoints. The device must pass its ID and Bearer authentication token for validation.
+        </p>
+
+        <!-- API 1 -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px] uppercase font-mono">POST</span>
+            <code class="text-xs font-bold text-white font-mono">/api/device/register</code>
+          </div>
+          <p class="text-xs text-zinc-500 leading-normal">
+            Registers the hardware node in the database during system boot.
+          </p>
+          <div class="relative group">
+            <button class="copy-btn absolute top-3 right-3 bg-zinc-900 border border-zinc-800 text-[10px] font-semibold text-zinc-400 hover:text-white px-2 py-1 rounded transition-all">Copy</button>
+            <pre class="p-4 rounded-xl font-mono text-[11px] text-zinc-300 overflow-x-auto">
+// Request Payload:
+{
+  "deviceId": "second-brain-001",
+  "name": "Second Brain C6 Wearable",
+  "token": "dev-token-xyz123"
+}</pre>
+          </div>
+        </div>
+
+        <!-- API 2 -->
+        <div class="space-y-3 pt-4">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px] uppercase font-mono">POST</span>
+            <code class="text-xs font-bold text-white font-mono">/api/device/heartbeat</code>
+          </div>
+          <p class="text-xs text-zinc-500 leading-normal">
+            Triggered by the device every 10 seconds. Transmits current battery level and reads pending settings or command payloads queued in the dashboard.
+          </p>
+          <div class="relative group">
+            <button class="copy-btn absolute top-3 right-3 bg-zinc-900 border border-zinc-800 text-[10px] font-semibold text-zinc-400 hover:text-white px-2 py-1 rounded transition-all">Copy</button>
+            <pre class="p-4 rounded-xl font-mono text-[11px] text-zinc-300 overflow-x-auto">
+// Response Schema from Server:
+{
+  "success": true,
+  "settings": {
+    "brightness": 100,
+    "ledBehavior": "rainbow",
+    "recordingDuration": 5,
+    "wifiSsid": "Simba"
+  },
+  "command": "notification", // optional
+  "title": "Calendar Reminder",
+  "message": "Project review meeting in 10m"
+}</pre>
+          </div>
+        </div>
+
+        <!-- API 3 -->
+        <div class="space-y-3 pt-4">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px] uppercase font-mono">POST</span>
+            <code class="text-xs font-bold text-white font-mono">/api/device/voice</code>
+          </div>
+          <p class="text-xs text-zinc-500 leading-normal">
+            Processes audio voice streams. Accepts binary Mono PCM wav data. The headers <code class="bg-zinc-900 text-zinc-400 px-1 py-0.5 rounded text-[10px]">X-Device-ID</code> and <code class="bg-zinc-900 text-zinc-400 px-1 py-0.5 rounded text-[10px]">Authorization</code> must be passed.
+          </p>
+          <div class="relative group">
+            <button class="copy-btn absolute top-3 right-3 bg-zinc-900 border border-zinc-800 text-[10px] font-semibold text-zinc-400 hover:text-white px-2 py-1 rounded transition-all">Copy</button>
+            <pre class="p-4 rounded-xl font-mono text-[11px] text-zinc-300 overflow-x-auto">
+// Response from Server:
+{
+  "success": true,
+  "transcript": "Add task finish schematic documentation",
+  "response": "✓ TASK CREATED\n\nFinish schematic documentation"
+}</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Guide Section -->
+      <section id="dashboard" class="doc-section scroll-mt-24 space-y-4">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">5.</span>
+          <span>Web Dashboard Guide</span>
+        </h2>
+        <p class="text-xs sm:text-sm leading-relaxed text-zinc-400">
+          The dashboard at <code class="bg-zinc-900 text-zinc-300 px-1 py-0.5 rounded text-[11px] font-mono">/dashboard</code> allows you to monitor and customize your Second Brain device:
+        </p>
+        <ul class="list-disc pl-5 text-xs text-zinc-400 space-y-2">
+          <li><strong>Overview Console</strong>: Display the device connectivity state, dynamic battery percentage, and dispatch custom alerts and commands directly to the OLED display.</li>
+          <li><strong>Tasks Queue</strong>: View tasks that have been transcribed and created from your voice. Mark them complete or delete them directly.</li>
+          <li><strong>Memory Bank</strong>: Browse all note transcripts and filter items by hashtags.</li>
+          <li><strong>Assistant Chat Link</strong>: Directly converse with your unified memory bank and ask questions powered by the server's AI (Gemini/OpenAI).</li>
+        </ul>
+      </section>
+
+      <!-- Troubleshooting Section -->
+      <section id="troubleshooting" class="doc-section scroll-mt-24 space-y-6">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2.5">
+          <span class="text-cybercyan font-mono">6.</span>
+          <span>Troubleshooting</span>
+        </h2>
+        
+        <div class="space-y-4">
+          <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-widest">ESP32 Loop Reboots & WiFi Failures</h3>
+          <p class="text-xs text-zinc-500 leading-normal">
+            If the device fails to connect to the custom WiFi credentials entered in the dashboard, it can enter a reboot loop. 
+            The firmware includes a safety stash mechanism: it stashes failed credentials, reboots, and automatically falls back to your hardcoded credentials in <code class="bg-zinc-900 text-zinc-400 px-1 py-0.5 rounded text-[10px]">config.h</code> to recover connectivity. Check your router configuration or SSID password if this loop occurs.
+          </p>
+        </div>
+
+        <div class="space-y-4 pt-2">
+          <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-widest">I2S Microphone Init Fails</h3>
+          <p class="text-xs text-zinc-500 leading-normal">
+            If the serial logs print <code class="bg-zinc-900 text-zinc-400 px-1 py-0.5 rounded text-[10px] font-mono">[I2S] Initialization FAILED!</code>, double check the wiring pins for the INMP441 microphone. The SCK (clock), WS (word select), and SD (data) pins must match GPIO pins 4, 5, and 20 exactly. Also, make sure that the microphone's L/R selection pin is grounded so it streams on the left channel.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-zinc-900 py-8 bg-zinc-950/20 text-center text-xs text-zinc-650">
+    <p>Second Brain Wearable Companion • Project Documentation Suite</p>
+    <p class="text-[10px] text-zinc-600 mt-1">Configured for direct GitHub Pages deployment in /docs</p>
+  </footer>
+
+  <!-- Documentation Interactive Logic -->
+  <script>
+    // Search filtering logic
+    const searchInput = document.getElementById('search-input');
+    const docSections = document.querySelectorAll('.doc-section');
+    const menuLinks = document.querySelectorAll('.menu-link');
+    
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      
+      docSections.forEach(section => {
+        const title = section.querySelector('h2').textContent.toLowerCase();
+        const content = section.textContent.toLowerCase();
+        
+        if (title.includes(query) || content.includes(query)) {
+          section.style.display = 'block';
+        } else {
+          section.style.display = 'none';
+        }
+      });
+    });
+
+    // Copy to clipboard functionality for code blocks
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pre = btn.nextElementSibling;
+        const text = pre.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          const originalText = btn.textContent;
+          btn.textContent = 'Copied!';
+          btn.style.color = '#22d3ee'; // cybercyan
+          btn.style.borderColor = '#22d3ee';
+          
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }, 2000);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

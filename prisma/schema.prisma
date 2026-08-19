@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Device {
+  id                String   @id @default(uuid())
+  deviceId          String   @unique
+  name              String
+  token             String
+  battery           Int      @default(-1)
+  firmware          String   @default("0.1.0")
+  lastHeartbeat     DateTime @default(now())
+  status            String   @default("offline") // "online", "offline"
+  brightness        Int      @default(100)
+  ledBehavior       String   @default("rainbow")
+  recordingDuration Int      @default(5)
+  wifiSsid          String   @default("")
+  wifiPassword      String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Task {
+  id        String    @id @default(uuid())
+  title     String
+  completed Boolean   @default(false)
+  dueDate   DateTime?
+  priority  String    @default("medium") // "low", "medium", "high"
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  tags      String   @default("") // Comma-separated tags
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VoiceInteraction {
+  id         String   @id @default(uuid())
+  deviceId   String
+  transcript String
+  response   String
+  intent     String
+  createdAt  DateTime @default(now())
+}
+
+model CommandQueue {
+  id        String   @id @default(uuid())
+  deviceId  String
+  command   String
+  payload   String   // JSON string
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

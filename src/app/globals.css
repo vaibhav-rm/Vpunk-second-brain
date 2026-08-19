@@ -1,26 +1,171 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), sans-serif;
+  --font-space: var(--font-inter), sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #000000;
+  --foreground: #f4f4f5;
+  --card-bg: #1c1c1e;
+  --card-border: rgba(255, 255, 255, 0.08);
+  
+  --system-green: #30d158;
+  --system-blue: #0a84ff;
+  --system-orange: #ff9f0a;
+  --system-red: #ff453a;
+  --system-grey: #8e8e93;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium System Card */
+.cyber-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.cyber-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Premium Inputs */
+.cyber-input {
+  background-color: #121214;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+  border-radius: 8px;
+}
+
+.cyber-input:focus {
+  outline: none;
+  border-color: #52525b; /* zinc-600 */
+  background-color: #161619;
+}
+
+.cyber-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Premium Buttons */
+.cyber-btn-cyan {
+  background-color: #ffffff;
+  color: #000000;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cyber-btn-cyan:hover {
+  background-color: #e4e4e7;
+}
+
+.cyber-btn-cyan:active {
+  transform: scale(0.98);
+}
+
+.cyber-btn-purple {
+  background-color: #27272a; /* zinc-800 */
+  color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cyber-btn-purple:hover {
+  background-color: #3f3f46; /* zinc-700 */
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cyber-btn-purple:active {
+  transform: scale(0.98);
+}
+
+.cyber-btn-stealth {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cyber-btn-stealth:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+/* System Pulse Green */
+@keyframes heartbeat-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.cyber-pulse-green {
+  animation: heartbeat-pulse 2s infinite ease-in-out;
+  background-color: var(--system-green);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #2d2d2f;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3c;
+}
+
+/* Checkbox */
+.cyber-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background-color: transparent;
+  display: inline-grid;
+  place-content: center;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cyber-checkbox:checked {
+  border-color: #ffffff;
+  background-color: #ffffff;
+}
+
+.cyber-checkbox:checked::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(1);
+  background-color: #000000;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
