@@ -20,6 +20,10 @@
 # production
 /build
 
+# arduino-cli toolchain (local build cache, large)
+firmware/.arduino15/
+firmware/Arduino/
+
 # misc
 .DS_Store
 *.pem

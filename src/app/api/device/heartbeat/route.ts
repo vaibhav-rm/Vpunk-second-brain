@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         command: pendingCommand.command,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+        date: new Date().toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }),
         settings: {
           name: device.name,
           brightness: device.brightness,
@@ -74,9 +76,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const now = new Date();
     return NextResponse.json({
       success: true,
       status: "online",
+      // Wall-clock for the OLED CLOCK page (device has no RTC).
+      time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+      date: now.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }),
       settings: {
         name: device.name,
         brightness: device.brightness,

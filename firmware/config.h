@@ -2,17 +2,30 @@
 #define CONFIG_H
 
 // Default WiFi credentials (used if not overridden by dynamic settings in NVS)
-#define DEFAULT_WIFI_SSID "Simba"
-#define DEFAULT_WIFI_PASS "Simba.5g"
+#define DEFAULT_WIFI_SSID "Sri Krishna Pg 41"
+#define DEFAULT_WIFI_PASS "srikrishnafour"
 
 // Web Dashboard / Next.js Agent details
 // NOTE: Change this to your computer's local IP address (e.g. 192.168.1.20)
-#define DEFAULT_AGENT_HOST "192.168.29.8" 
+#define DEFAULT_AGENT_HOST "192.168.0.114" 
 #define DEFAULT_AGENT_PORT 3000
 
 // Device Identity
 #define DEVICE_ID "second-brain-001"
 #define DEVICE_TOKEN "dev-token-xyz123"
+
+// OLED pages (defined here so Arduino's auto-generated function prototypes
+// further down the .ino can reference the type).
+// Order = boot/page-flip order: CLOCK first, then STATUS, TASKS, ...
+enum OledPage : uint8_t {
+  PAGE_CLOCK = 0,
+  PAGE_STATUS,
+  PAGE_TASKS,
+  PAGE_NOTES,
+  PAGE_WEATHER,
+  PAGE_AI,
+  PAGE_COUNT
+};
 
 // Hardware Pinout Configuration
 #define STATUS_LED_PIN    8 // Onboard LED

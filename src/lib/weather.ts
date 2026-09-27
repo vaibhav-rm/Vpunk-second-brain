@@ -18,13 +18,24 @@ function translateWeatherCode(code: number): string {
   return "Cloudy";
 }
 
+// Module-scope cache (dev server is a single long-lived process)
+const weatherCache = new Map<string, { at: number; info: WeatherInfo }>();
+
 export async function fetchWeather(
   lat: number = 18.5204, // Default to Pune, India or user location
   lon: number = 73.8567
 ): Promise<WeatherInfo> {
+  // 10-minute cache: weather barely moves, but every snapshot/page used to
+  // pay a full round-trip to Open-Meteo (often 0.5-2s). Cached reads are ~1ms.
+  const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+  const now = Date.now();
+  const hit = weatherCache.get(key);
+  if (hit && now - hit.at < 10 * 60 * 1000) return hit.info;
+
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
-    const response = await fetch(url);
+    // Bounded: a hung Open-Meteo call must never hold a voice POST open.
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!response.ok) {
       throw new Error(`Open-Meteo returned status ${response.status}`);
     }
@@ -36,14 +47,18 @@ export async function fetchWeather(
     const tomorrowMin = Math.round(data.daily.temperature_2m_min[1]);
     const tomorrowMax = Math.round(data.daily.temperature_2m_max[1]);
 
-    return {
+    const info = {
       temp,
       condition,
       tomorrowMin,
       tomorrowMax,
     };
+    weatherCache.set(key, { at: now, info });
+    return info;
   } catch (error) {
     console.error("Failed to fetch weather:", error);
+    // Serve stale cache over the hardcoded fallback when possible
+    if (hit) return hit.info;
     return {
       temp: 24,
       condition: "Partly cloudy",

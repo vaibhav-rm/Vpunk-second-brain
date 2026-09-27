@@ -23,7 +23,7 @@ export async function getDashboardData() {
       lastHeartbeat: new Date(),
       brightness: 100,
       ledBehavior: "rainbow",
-      recordingDuration: 5,
+      recordingDuration: 3,
       wifiSsid: "VAIBHAV_WIFI",
       wifiPassword: "••••••••",
     };
@@ -70,7 +70,7 @@ export async function getDashboardData() {
         lastHeartbeat: new Date(),
         brightness: 100,
         ledBehavior: "rainbow",
-        recordingDuration: 5,
+        recordingDuration: 3,
         wifiSsid: "VAIBHAV_WIFI",
         wifiPassword: "",
         isOnline: false,
@@ -252,7 +252,7 @@ export async function getVoiceHistory() {
 
 export async function sendChatMessage(prompt: string) {
   try {
-    const reply = await queryLLM(prompt);
+    const reply = await queryLLM(prompt, { context: true });
 
     // Also log this web-chat interaction as a voice-like log for unified display
     await prisma.voiceInteraction.create({
@@ -297,9 +297,10 @@ export async function simulateTextCommand(transcript: string) {
     const systemPrompt = `
 You are the AI engine for "Second Brain", a wearable companion.
 You will process the user's transcription and classify their intent.
+Write ALL output in English (never Chinese or any other language).
 Provide a clean JSON output matching this structure:
 {
-  "intent": "CREATE_TODO" | "CREATE_NOTE" | "QUERY_WEATHER" | "QUERY_CLOCK" | "GENERAL_AI" | "NAVIGATION",
+  "intent": "CREATE_TODO" | "CREATE_NOTE" | "QUERY_WEATHER" | "QUERY_CLOCK" | "QUERY_TASKS" | "QUERY_NOTES" | "GENERAL_AI" | "NAVIGATION",
   "extractedData": {
     "todoTitle": "Title of the task",
     "todoPriority": "low" | "medium" | "high",
@@ -309,16 +310,23 @@ Provide a clean JSON output matching this structure:
     "noteTags": "comma,separated,tags",
     "weatherQuery": "location or tomorrow/today query",
     "generalPrompt": "the question for general AI",
-    "navigationTarget": "todo" | "notes" | "weather" | "clock" | "ai"
+    "navigationTarget": "todo" | "notes" | "weather" | "clock" | "ai" | "history" | "settings" | "overview"
   }
 }
+
+Navigation targets map to the dashboard sections:
+"todo" = Tasks queue, "notes" = Memory Bank notes, "ai" = AI Chat Link,
+"history" = Voice Index/history log, "settings" = device settings,
+"overview" = dashboard overview, "weather" = weather, "clock" = clock.
 
 Guidelines:
 - If they want to add a task, to-do, reminder, or item to buy, set intent to CREATE_TODO.
 - If they want to remember something, write down a note, or save information, set intent to CREATE_NOTE.
 - If they ask about the weather, set intent to QUERY_WEATHER.
 - If they ask about time or clock, set intent to QUERY_CLOCK.
-- If they want to navigate/open an app on the screen, set intent to NAVIGATION.
+- If they ask to list/read/recap their tasks or to-do list, set intent to QUERY_TASKS.
+- If they ask to list/read/recap their notes or memory, set intent to QUERY_NOTES.
+- If they want to navigate/open a section (tasks, notes, AI chat, voice history/index, settings, overview/dashboard), set intent to NAVIGATION.
 - For general questions/queries (e.g. "how does a transistor work"), set intent to GENERAL_AI.
 - Output ONLY valid JSON. No markdown backticks. Do not wrap in \`\`\`json.
 `;
@@ -339,7 +347,11 @@ Guidelines:
       extractedData = parsed.extractedData || {};
     } catch (e) {
       const lower = transcript.toLowerCase();
-      if (lower.includes("task") || lower.includes("todo") || lower.includes("remind") || lower.includes("buy")) {
+      if (/(list|show|read|recap|what are|how many).*?(task|todo|to-do|reminder)/.test(lower) || /(my tasks|my todos)/.test(lower)) {
+        intent = "QUERY_TASKS";
+      } else if (/(list|show|read|recap|what).*?(note|memory|memories)/.test(lower) || /(my notes)/.test(lower)) {
+        intent = "QUERY_NOTES";
+      } else if (lower.includes("task") || lower.includes("todo") || lower.includes("remind") || lower.includes("buy")) {
         intent = "CREATE_TODO";
         extractedData.todoTitle = transcript.replace(/add task|todo|remind me to|buy/gi, "").trim();
         extractedData.todoPriority = lower.includes("urgent") || lower.includes("high") ? "high" : "medium";
@@ -353,9 +365,16 @@ Guidelines:
         intent = "QUERY_WEATHER";
       } else if (lower.includes("time") || lower.includes("clock") || lower.includes("date")) {
         intent = "QUERY_CLOCK";
-      } else if (lower.includes("open") || lower.includes("navigate") || lower.includes("go to")) {
+      } else if (lower.includes("open") || lower.includes("navigate") || lower.includes("go to") || lower.includes("show")) {
         intent = "NAVIGATION";
-        extractedData.navigationTarget = lower.includes("note") ? "notes" : "todo";
+        if (lower.includes("note")) extractedData.navigationTarget = "notes";
+        else if (lower.includes("weather")) extractedData.navigationTarget = "weather";
+        else if (lower.includes("clock") || lower.includes("time")) extractedData.navigationTarget = "clock";
+        else if (lower.includes("chat") || lower.includes("assistant")) extractedData.navigationTarget = "ai";
+        else if (lower.includes("history") || lower.includes("voice") || lower.includes("log")) extractedData.navigationTarget = "history";
+        else if (lower.includes("setting")) extractedData.navigationTarget = "settings";
+        else if (lower.includes("overview") || lower.includes("dashboard") || lower.includes("home")) extractedData.navigationTarget = "overview";
+        else extractedData.navigationTarget = "todo";
       } else {
         intent = "GENERAL_AI";
         extractedData.generalPrompt = transcript;
@@ -409,6 +428,35 @@ Guidelines:
         responseMessage = `CLOCK\n\n${timeStr}\n\n${dateStr}`;
         break;
       }
+      case "QUERY_TASKS": {
+        const openTasks = await prisma.task.findMany({
+          where: { completed: false },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        });
+        if (openTasks.length === 0) {
+          responseMessage = `TASKS\n\nAll clear! No open tasks.`;
+        } else {
+          const lines = openTasks.slice(0, 4).map((t, i) => `${i + 1}. ${t.title}`);
+          const more = openTasks.length > 4 ? `\n+${openTasks.length - 4} more` : "";
+          responseMessage = `TASKS (${openTasks.length})\n\n${lines.join("\n")}${more}`;
+        }
+        break;
+      }
+      case "QUERY_NOTES": {
+        const simNotes = await prisma.note.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        });
+        if (simNotes.length === 0) {
+          responseMessage = `NOTES\n\nNo notes saved yet.`;
+        } else {
+          const lines = simNotes.slice(0, 4).map((n, i) => `${i + 1}. ${n.title}`);
+          const more = simNotes.length > 4 ? `\n+${simNotes.length - 4} more` : "";
+          responseMessage = `NOTES (${simNotes.length})\n\n${lines.join("\n")}${more}`;
+        }
+        break;
+      }
       case "NAVIGATION": {
         const target = extractedData.navigationTarget || "notes";
         await prisma.commandQueue.create({
@@ -425,7 +473,7 @@ Guidelines:
       case "GENERAL_AI":
       default: {
         const prompt = extractedData.generalPrompt || transcript;
-        const reply = await queryLLM(prompt);
+        const reply = await queryLLM(prompt, { context: true });
         const maxLen = 70;
         const truncated = reply.length > maxLen ? reply.substring(0, maxLen) + "..." : reply;
         responseMessage = `AI RESPONSE\n\n${truncated}`;

@@ -25,8 +25,8 @@ async function main() {
       brightness: 100,
       ledBehavior: "rainbow",
       recordingDuration: 5,
-      wifiSsid: "Simba.5G",
-      wifiPassword: "Simba.5g",
+      wifiSsid: "Sri Krishna Pg 41",
+      wifiPassword: "srikrishnafour",
     },
   });
 

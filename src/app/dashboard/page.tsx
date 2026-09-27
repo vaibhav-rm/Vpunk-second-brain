@@ -76,7 +76,7 @@ export default function Dashboard() {
   const [deviceName, setDeviceName] = useState("");
   const [deviceBrightness, setDeviceBrightness] = useState(100);
   const [deviceLed, setDeviceLed] = useState("rainbow");
-  const [deviceDuration, setDeviceDuration] = useState(5);
+  const [deviceDuration, setDeviceDuration] = useState(3);
   const [deviceWifiSsid, setDeviceWifiSsid] = useState("");
   const [deviceWifiPassword, setDeviceWifiPassword] = useState("");
 
@@ -106,7 +106,7 @@ export default function Dashboard() {
         setDeviceName(dbData.device.name || "");
         setDeviceBrightness(dbData.device.brightness || 100);
         setDeviceLed(dbData.device.ledBehavior || "rainbow");
-        setDeviceDuration(dbData.device.recordingDuration || 5);
+        setDeviceDuration(dbData.device.recordingDuration || 3);
         setDeviceWifiSsid(dbData.device.wifiSsid || "");
         setDeviceWifiPassword(dbData.device.wifiPassword || "");
       }

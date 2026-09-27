@@ -34,14 +34,14 @@ export default function LandingPage() {
   // Simulator State
   const [simState, setSimState] = useState<SimState>("idle");
   const [oledLine1, setOledLine1] = useState("WIFI ONLINE");
-  const [oledLine2, setOledLine2] = useState("IP: 192.168.29.8");
-  const [oledLine3, setOledLine3] = useState("Agent: 192.168.29.8:3000");
+  const [oledLine2, setOledLine2] = useState("IP: 192.168.0.114");
+  const [oledLine3, setOledLine3] = useState("Agent: 192.168.0.114:3000");
   const [oledLine4, setOledLine4] = useState("Press ACTION to record");
   const [inputText, setInputText] = useState("");
   const [consoleLogs, setConsoleLogs] = useState<string[]>([
     "[SYS] Second Brain OS v0.1.0 loaded.",
-    "[WIFI] Auto-connecting to Simba SSID...",
-    "[WIFI] Connected successfully. IP: 192.168.29.8",
+    "[WIFI] Auto-connecting to Sri Krishna Pg 41 SSID...",
+    "[WIFI] Connected successfully. IP: 192.168.0.114",
     "[HTTP] Registered device 'second-brain-001' on Next.js server.",
     "[I2S] INMP441 Microphone initialized. 16kHz 16-bit Mono Mono-PCM.",
     "[SYS] System idle. Press ACTION button on device to stream."
