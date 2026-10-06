@@ -26,6 +26,8 @@
 
 // Active configuration state (loaded from NVS or config.h)
 String wifiSsid;
+String wifiIdentity; // EAP outer identity (PEAP) — usually same as username
+String wifiUser;     // EAP username (empty = WPA2-Personal PSK mode)
 String wifiPassword;
 String agentHost;
 int agentPort;
@@ -669,9 +671,16 @@ void gotoPage(OledPage p) {
 void initPreferences() {
   preferences.begin("second-brain", false);
   
-  // Read saved values or fall back to config.h values
-  wifiSsid = preferences.getString("wifiSsid", DEFAULT_WIFI_SSID);
-  wifiPassword = preferences.getString("wifiPassword", DEFAULT_WIFI_PASS);
+  // WiFi is hardcoded: always "vivo 1933" PSK. Ignore any stale NVS
+  // (e.g. RVCE Enterprise creds from earlier flashes) and heal it once.
+  wifiSsid = DEFAULT_WIFI_SSID;
+  wifiIdentity = DEFAULT_WIFI_IDENTITY;
+  wifiUser = DEFAULT_WIFI_USER;
+  wifiPassword = DEFAULT_WIFI_PASS;
+  preferences.putString("wifiSsid", wifiSsid);
+  preferences.putString("wifiIdent", wifiIdentity);
+  preferences.putString("wifiUser", wifiUser);
+  preferences.putString("wifiPassword", wifiPassword);
   agentHost = preferences.getString("agentHost", DEFAULT_AGENT_HOST);
   agentPort = preferences.getInt("agentPort", DEFAULT_AGENT_PORT);
   ledBehavior = preferences.getString("ledBehavior", "rainbow");
@@ -680,6 +689,7 @@ void initPreferences() {
 
   if (Serial) Serial.println("--- Configuration Loaded ---");
   if (Serial) Serial.printf("SSID: %s\n", wifiSsid.c_str());
+  if (wifiUser.length() > 0 && Serial) Serial.printf("EAP user: %s (PEAP/MSCHAPv2)\n", wifiUser.c_str());
   if (Serial) Serial.printf("Agent Host: %s:%d\n", agentHost.c_str(), agentPort);
   if (Serial) Serial.printf("LED Behavior: %s\n", ledBehavior.c_str());
   if (Serial) Serial.printf("Brightness: %d%%\n", brightness);
@@ -689,6 +699,8 @@ void initPreferences() {
 
 void savePreferences() {
   preferences.putString("wifiSsid", wifiSsid);
+  preferences.putString("wifiIdent", wifiIdentity);
+  preferences.putString("wifiUser", wifiUser);
   preferences.putString("wifiPassword", wifiPassword);
   preferences.putString("agentHost", agentHost);
   preferences.putInt("agentPort", agentPort);
@@ -698,13 +710,27 @@ void savePreferences() {
   if (Serial) Serial.println("[NVS] Configuration saved to flash memory.");
 }
 
-void connectToWiFi(bool quick = false, bool silent = false) {
-  if (Serial) Serial.printf("[WiFi] Connecting to SSID: %s\n", wifiSsid.c_str());
+// Start a WiFi connection: WPA2-Enterprise PEAP/MSCHAPv2 when an EAP
+// username is set, else plain WPA2-Personal PSK (current: vivo 1933 PSK).
+void wifiStart(const char* ssid, const char* ident, const char* user, const char* pass) {
   WiFi.disconnect(true);
   delay(500);
-  WiFi.begin(wifiSsid.c_str(), wifiPassword.c_str());
+  WiFi.mode(WIFI_STA);
+  if (user != nullptr && user[0] != '\0') {
+    const char* id = (ident != nullptr && ident[0] != '\0') ? ident : user;
+    if (Serial) Serial.printf("[WiFi] Enterprise PEAP as '%s' (no CA verify)\n", user);
+    WiFi.begin(ssid, WPA2_AUTH_PEAP, id, user, pass);
+  } else {
+    WiFi.begin(ssid, pass);
+  }
+}
 
-  if (!silent) updateDisplay("CONNECTING WIFI", "SSID: " + wifiSsid, "Connecting...");
+void connectToWiFi(bool quick = false, bool silent = false) {
+  if (Serial) Serial.printf("[WiFi] Connecting to SSID: %s\n", wifiSsid.c_str());
+  wifiStart(wifiSsid.c_str(), wifiIdentity.c_str(), wifiUser.c_str(), wifiPassword.c_str());
+
+  String modeTag = wifiUser.length() > 0 ? " (EAP)" : "";
+  if (!silent) updateDisplay("CONNECTING WIFI", "SSID: " + wifiSsid + modeTag, "Connecting...");
 
   // Bounded attempts: full budget at boot, short budget on loop retries so
   // buttons stay responsive (the 15s timer calls us again if it fails).
@@ -739,9 +765,7 @@ void connectToWiFi(bool quick = false, bool silent = false) {
       if (Serial) Serial.printf("[WiFi] Triggering fallback to hardcoded default: %s\n", DEFAULT_WIFI_SSID);
       if (!silent) updateDisplay("WIFI FALLBACK", "SSID: " + String(DEFAULT_WIFI_SSID), "Trying default...");
       
-      WiFi.disconnect(true);
-      delay(500);
-      WiFi.begin(DEFAULT_WIFI_SSID, DEFAULT_WIFI_PASS);
+      wifiStart(DEFAULT_WIFI_SSID, DEFAULT_WIFI_IDENTITY, DEFAULT_WIFI_USER, DEFAULT_WIFI_PASS);
       attempts = 0;
       while (WiFi.status() != WL_CONNECTED && attempts < budget) {
         delay(500);
@@ -758,6 +782,8 @@ void connectToWiFi(bool quick = false, bool silent = false) {
       
       // Save working default fallback WiFi back to NVS preferences to prevent future delays
       wifiSsid = DEFAULT_WIFI_SSID;
+      wifiIdentity = DEFAULT_WIFI_IDENTITY;
+      wifiUser = DEFAULT_WIFI_USER;
       wifiPassword = DEFAULT_WIFI_PASS;
       savePreferences();
       
@@ -938,17 +964,8 @@ void doHeartbeat() {
 
     bool settingsChanged = false;
 
-    // Only accept WiFi updates if they don't match the one that just failed to connect
-    if (settings.containsKey("wifiSsid")) {
-      String newSsid = settings["wifiSsid"].as<String>();
-      if (newSsid != wifiSsid && newSsid != lastFailedSsid) {
-        wifiSsid = newSsid;
-        settingsChanged = true;
-      }
-    }
-    if (settings.containsKey("wifiPassword") && settingsChanged) {
-      wifiPassword = settings["wifiPassword"].as<String>();
-    }
+    // WiFi is hardcoded to "vivo 1933" — ignore any server-pushed WiFi
+    // credentials so the device can never roam to another network.
 
     if (settings.containsKey("ledBehavior") && settings["ledBehavior"].as<String>() != ledBehavior) {
       ledBehavior = settings["ledBehavior"].as<String>();
@@ -967,16 +984,6 @@ void doHeartbeat() {
       if (Serial) Serial.println("[Sync] Configuration updated from dashboard settings!");
       xSemaphoreGive(netMutex);
       savePreferences();
-
-      // Re-evaluate WiFi connection if SSID changed
-      xSemaphoreTake(netMutex, portMAX_DELAY);
-      bool needRestart = settings.containsKey("wifiSsid") && settings["wifiSsid"].as<String>() != lastFailedSsid;
-      xSemaphoreGive(netMutex);
-      if (needRestart) {
-        if (Serial) Serial.println("[Sync] WiFi credentials updated. Restarting device to reconnect...");
-        delay(1000);
-        ESP.restart();
-      }
     } else {
       xSemaphoreGive(netMutex);
     }

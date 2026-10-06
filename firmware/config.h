@@ -2,12 +2,15 @@
 #define CONFIG_H
 
 // Default WiFi credentials (used if not overridden by dynamic settings in NVS)
-#define DEFAULT_WIFI_SSID "Sri Krishna Pg 41"
-#define DEFAULT_WIFI_PASS "srikrishnafour"
+// Single home hotspot — plain WPA2-Personal PSK. No Enterprise here.
+#define DEFAULT_WIFI_SSID "vivo 1933"
+#define DEFAULT_WIFI_IDENTITY ""
+#define DEFAULT_WIFI_USER ""
+#define DEFAULT_WIFI_PASS "555544444"
 
 // Web Dashboard / Next.js Agent details
 // NOTE: Change this to your computer's local IP address (e.g. 192.168.1.20)
-#define DEFAULT_AGENT_HOST "192.168.0.114" 
+#define DEFAULT_AGENT_HOST "192.168.153.9" 
 #define DEFAULT_AGENT_PORT 3000
 
 // Device Identity
